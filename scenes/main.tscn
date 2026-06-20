@@ -1,0 +1,162 @@
+[gd_scene load_steps=22 format=3 uid="uid://cm4n1coufv45e"]
+
+[ext_resource type="Script" uid="uid://1o8nuu1o6k5w" path="res://scripts/game.gd" id="1_game"]
+[ext_resource type="Script" uid="uid://ctlx2evlgontr" path="res://scripts/ball.gd" id="2_ball"]
+[ext_resource type="Script" uid="uid://bh2wkpio342pw" path="res://scripts/player.gd" id="3_player"]
+[ext_resource type="Script" uid="uid://c8vbeqny8w60b" path="res://scripts/field_lines.gd" id="4_lines"]
+[ext_resource type="Script" uid="uid://cgchjwgwi4ype" path="res://scripts/corner_arcs.gd" id="5_arcs"]
+[ext_resource type="Texture2D" uid="uid://bdvk8764081pt" path="res://assets/soccer_ball.png" id="6_ball_tex"]
+
+[sub_resource type="BoxMesh" id="floor_mesh"]
+size = Vector3(24, 0.1, 10)
+
+[sub_resource type="StandardMaterial3D" id="floor_mat"]
+albedo_color = Color(0.2, 0.55, 0.2, 1)
+roughness = 0.9
+
+[sub_resource type="BoxShape3D" id="floor_shape"]
+size = Vector3(24, 0.1, 10)
+
+[sub_resource type="BoxMesh" id="goal_post_mesh"]
+size = Vector3(0.12, 2, 0.12)
+
+[sub_resource type="StandardMaterial3D" id="goal_post_mat"]
+metallic = 0.4
+roughness = 0.3
+
+[sub_resource type="BoxMesh" id="crossbar_mesh"]
+size = Vector3(0.12, 0.12, 2.52)
+
+[sub_resource type="PlaneMesh" id="net_mesh"]
+size = Vector2(2.4, 2)
+
+[sub_resource type="StandardMaterial3D" id="net_mat"]
+transparency = 1
+cull_mode = 2
+albedo_color = Color(1, 1, 1, 0.2)
+
+[sub_resource type="BoxShape3D" id="goal_area_shape"]
+size = Vector3(1.5, 2, 2.6)
+
+[sub_resource type="SphereMesh" id="ball_mesh"]
+radius = 0.2
+height = 0.4
+radial_segments = 32
+rings = 16
+
+[sub_resource type="StandardMaterial3D" id="ball_mat"]
+albedo_texture = ExtResource("6_ball_tex")
+metallic = 0.1
+roughness = 0.3
+
+[sub_resource type="SphereShape3D" id="ball_shape"]
+radius = 0.2
+
+[sub_resource type="CapsuleMesh" id="player_mesh"]
+radius = 0.25
+height = 1.0
+
+[sub_resource type="StandardMaterial3D" id="player_mat"]
+albedo_color = Color(0.85, 0.1, 0.1, 1)
+roughness = 0.6
+
+[sub_resource type="CapsuleShape3D" id="player_shape"]
+radius = 0.25
+height = 1.0
+
+[node name="Main" type="Node3D"]
+script = ExtResource("1_game")
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(0.866, -0.354, 0.354, 0, 0.707, 0.707, -0.5, -0.612, 0.612, 0, 18, 14)
+projection = 1
+size = 14.0
+near = 0.1
+far = 100.0
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.866, -0.354, 0.354, 0, 0.707, 0.707, -0.5, -0.612, 0.612, 5, 15, 5)
+light_energy = 1.2
+shadow_enabled = true
+
+[node name="Field" type="StaticBody3D" parent="."]
+collision_mask = 0
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Field"]
+mesh = SubResource("floor_mesh")
+surface_material_override/0 = SubResource("floor_mat")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Field"]
+shape = SubResource("floor_shape")
+
+[node name="FieldLines" type="Node3D" parent="."]
+script = ExtResource("4_lines")
+
+[node name="GoalPosts" type="Node3D" parent="."]
+
+[node name="LeftPost" type="MeshInstance3D" parent="GoalPosts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1, -1.2)
+mesh = SubResource("goal_post_mesh")
+surface_material_override/0 = SubResource("goal_post_mat")
+
+[node name="RightPost" type="MeshInstance3D" parent="GoalPosts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 1, 1.2)
+mesh = SubResource("goal_post_mesh")
+surface_material_override/0 = SubResource("goal_post_mat")
+
+[node name="Crossbar" type="MeshInstance3D" parent="GoalPosts"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -12, 2, 0)
+mesh = SubResource("crossbar_mesh")
+surface_material_override/0 = SubResource("goal_post_mat")
+
+[node name="Net" type="MeshInstance3D" parent="GoalPosts"]
+transform = Transform3D(0, 0, -1, 0, 1, 0, -1, 0, 0, -13.2, 1, 0)
+mesh = SubResource("net_mesh")
+surface_material_override/0 = SubResource("net_mat")
+
+[node name="CornerWalls" type="Node3D" parent="."]
+script = ExtResource("5_arcs")
+
+[node name="GoalArea" type="Area3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -13, 1, 0)
+collision_layer = 4
+collision_mask = 2
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="GoalArea"]
+shape = SubResource("goal_area_shape")
+
+[node name="Ball" type="RigidBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2, 0.2, 0)
+collision_layer = 2
+script = ExtResource("2_ball")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Ball"]
+mesh = SubResource("ball_mesh")
+surface_material_override/0 = SubResource("ball_mat")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Ball"]
+shape = SubResource("ball_shape")
+
+[node name="Player" type="CharacterBody3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.5, 0)
+script = ExtResource("3_player")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Player"]
+mesh = SubResource("player_mesh")
+surface_material_override/0 = SubResource("player_mat")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Player"]
+shape = SubResource("player_shape")
+
+[node name="UI" type="CanvasLayer" parent="."]
+
+[node name="ScoreLabel" type="Label" parent="UI"]
+offset_left = 490.0
+offset_top = 5.0
+offset_right = 790.0
+offset_bottom = 55.0
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 32
+text = "SCORE: 0"
+horizontal_alignment = 1
+vertical_alignment = 1
